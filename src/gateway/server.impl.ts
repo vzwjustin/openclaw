@@ -623,12 +623,13 @@ export async function startGatewayServer(
       }),
     );
 
-    const { execApprovalManager, pluginApprovalManager, extraHandlers } = createGatewayAuxHandlers({
+    const { execApprovalManager, pluginApprovalManager, nodeCommandBroker, extraHandlers } = createGatewayAuxHandlers({
       log,
       activateRuntimeSecrets,
       sharedGatewaySessionGenerationState,
       resolveSharedGatewaySessionGenerationForConfig,
       clients,
+      nodeRegistry,
     });
 
     const canvasHostServerPort = (canvasHostServer as CanvasHostServer | null)?.port;
@@ -695,6 +696,7 @@ export async function startGatewayServer(
       wizardRunner,
       broadcastVoiceWakeChanged,
       unavailableGatewayMethods,
+      nodeCommandBroker,
     });
 
     setFallbackGatewayContextResolver(() => gatewayRequestContext);

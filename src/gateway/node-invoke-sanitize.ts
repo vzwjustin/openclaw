@@ -8,6 +8,7 @@ export function sanitizeNodeInvokeParamsForForwarding(opts: {
   rawParams: unknown;
   client: GatewayClient | null;
   execApprovalManager?: ExecApprovalManager;
+  skipApprovalCheck?: boolean;
 }):
   | { ok: true; params: unknown }
   | { ok: false; message: string; details?: Record<string, unknown> } {
@@ -17,6 +18,7 @@ export function sanitizeNodeInvokeParamsForForwarding(opts: {
       rawParams: opts.rawParams,
       client: opts.client,
       execApprovalManager: opts.execApprovalManager,
+      skipApprovalCheck: opts.skipApprovalCheck ?? false,
     });
   }
   return { ok: true, params: opts.rawParams };

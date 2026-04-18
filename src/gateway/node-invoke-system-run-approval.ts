@@ -86,12 +86,18 @@ export function sanitizeSystemRunParamsForForwarding(opts: {
   client: ApprovalClient | null;
   execApprovalManager?: ApprovalLookup;
   nowMs?: number;
+  skipApprovalCheck?: boolean;
 }):
   | { ok: true; params: unknown }
   | { ok: false; message: string; details?: Record<string, unknown> } {
   const obj = asNullableRecord(opts.rawParams);
   if (!obj) {
     return { ok: true, params: opts.rawParams };
+  }
+
+  // When the policy broker has already approved this action, skip the approval gate entirely.
+  if (opts.skipApprovalCheck === true) {
+    return { ok: true, params: pickSystemRunParams(obj) };
   }
 
   const p = obj as SystemRunParamsLike;

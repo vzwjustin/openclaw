@@ -375,6 +375,8 @@ export type GatewayNodesConfig = {
   allowCommands?: string[];
   /** Commands to deny even if they appear in the defaults or node claims. */
   denyCommands?: string[];
+  /** Policy profile id to apply for node command execution (default: builtin.ask_before_mutating). */
+  policyProfileId?: string;
 };
 
 export type GatewayToolsConfig = {
