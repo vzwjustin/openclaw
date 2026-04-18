@@ -378,14 +378,31 @@ export function createExecApprovalHandlers(
           }) satisfies ExecApprovalResolved,
         forwardResolved: (resolvedEvent) => opts?.forwarder?.handleResolved(resolvedEvent),
         forwardResolvedErrorLabel: "exec approvals: forward resolve failed",
-        extraResolvedHandlers: opts?.iosPushDelivery?.handleResolved
-          ? [
-              {
-                run: (resolvedEvent) => opts.iosPushDelivery!.handleResolved!(resolvedEvent),
-                errorLabel: "exec approvals: iOS push resolve failed",
-              },
-            ]
-          : undefined,
+        extraResolvedHandlers: [
+          ...(opts?.iosPushDelivery?.handleResolved
+            ? [
+                {
+                  run: (resolvedEvent: ExecApprovalResolved) =>
+                    opts.iosPushDelivery!.handleResolved!(resolvedEvent),
+                  errorLabel: "exec approvals: iOS push resolve failed",
+                },
+              ]
+            : []),
+          {
+            run: async (resolvedEvent: ExecApprovalResolved) => {
+              const broker = context.nodeCommandBroker;
+              if (!broker) return;
+              const snapshot = manager.getSnapshot(resolvedEvent.id);
+              const storedReq = (snapshot as unknown as Record<string, unknown> | undefined)?.["_brokerActionRequest"];
+              if (!storedReq) return;
+              await broker.resumeAfterApproval(
+                resolvedEvent.id,
+                storedReq as import("../policy/types.js").ActionRequest,
+              );
+            },
+            errorLabel: "exec approvals: broker resume failed",
+          },
+        ],
       });
     },
   };

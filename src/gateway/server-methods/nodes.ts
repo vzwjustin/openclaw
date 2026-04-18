@@ -990,6 +990,35 @@ export const nodeHandlers: GatewayRequestHandlers = {
           `node wake done node=${nodeId} req=${wakeReqId} connected=true totalMs=${totalDurationMs}`,
         );
       }
+      if (context.nodeCommandBroker) {
+        const brokerReq = {
+          idempotencyKey: p.idempotencyKey,
+          userId: client?.connect?.device?.id ?? client?.connect?.client?.id ?? "unknown",
+          surface: "node" as const,
+          nodeId,
+          command,
+          input: (p.params ?? {}) as Record<string, unknown>,
+          correlationId: req.id,
+        };
+        const outcome = await context.nodeCommandBroker.submit(brokerReq);
+        if (outcome.kind === "denied") {
+          respond(false, undefined, errorShape(ErrorCodes.INVALID_REQUEST, outcome.reason, { details: { code: "POLICY_DENIED", command } }));
+          return;
+        }
+        if (outcome.kind === "approval_required") {
+          respond(false, undefined, errorShape(ErrorCodes.UNAVAILABLE, "node command requires approval", { details: { code: "APPROVAL_REQUIRED", approvalId: outcome.approvalId, command } }));
+          return;
+        }
+        if (outcome.kind === "failed") {
+          respond(false, undefined, errorShape(ErrorCodes.UNAVAILABLE, outcome.errorMessage, { details: { code: "NODE_INVOKE_FAILED", command } }));
+          return;
+        }
+        // allowed
+        const payload = outcome.result.output;
+        respond(true, { ok: true, nodeId, command, payload, payloadJSON: null }, undefined);
+        return;
+      }
+
       const cfg = loadConfig();
       const allowlist = resolveNodeCommandAllowlist(cfg, nodeSession);
       const allowed = isNodeCommandAllowed({
