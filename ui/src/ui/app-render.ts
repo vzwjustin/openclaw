@@ -120,7 +120,14 @@ import {
 import { buildExternalLinkRel, EXTERNAL_LINK_TARGET } from "./external-link.ts";
 import "./components/dashboard-header.ts";
 import { icons } from "./icons.ts";
-import { normalizeBasePath, TAB_GROUPS, subtitleForTab, titleForTab } from "./navigation.ts";
+import {
+  BREEZE_GROUP_LABELS,
+  normalizeBasePath,
+  TAB_GROUPS,
+  TAB_GROUPS_BREEZE,
+  subtitleForTab,
+  titleForTab,
+} from "./navigation.ts";
 import { isPluginEnabledInConfigSnapshot } from "./plugin-activation.ts";
 import { agentLogoUrl } from "./views/agents-utils.ts";
 import {
@@ -1290,10 +1297,14 @@ export function renderApp(state: AppViewState) {
             </div>
             <div class="sidebar-shell__body">
               <nav class="sidebar-nav">
-                ${TAB_GROUPS.map((group) => {
+                ${(state.settings.theme === "breeze" ? TAB_GROUPS_BREEZE : TAB_GROUPS).map((group) => {
                   const isGroupCollapsed = state.settings.navGroupsCollapsed[group.label] ?? false;
                   const hasActiveTab = group.tabs.some((tab) => tab === state.tab);
                   const showItems = navCollapsed || hasActiveTab || !isGroupCollapsed;
+                  const groupLabel =
+                    state.settings.theme === "breeze"
+                      ? (BREEZE_GROUP_LABELS[group.label] ?? group.label)
+                      : t(`nav.${group.label}`);
 
                   return html`
                     <section class="nav-section ${!showItems ? "nav-section--collapsed" : ""}">
@@ -1311,9 +1322,7 @@ export function renderApp(state: AppViewState) {
                               }}
                               aria-expanded=${showItems}
                             >
-                              <span class="nav-section__label-text"
-                                >${t(`nav.${group.label}`)}</span
-                              >
+                              <span class="nav-section__label-text">${groupLabel}</span>
                               <span class="nav-section__chevron"> ${icons.chevronDown} </span>
                             </button>
                           `

@@ -24,6 +24,44 @@ export const TAB_GROUPS = [
   },
 ] as const;
 
+/**
+ * Breeze nav groups — six-noun structure ported from Breeze web design DNA:
+ * Chats · Tasks · Approvals · Connectors · Memories · Settings.
+ * Only used when the user has selected the `breeze` theme.
+ * Existing views are re-homed under these labels; nothing is removed.
+ */
+export const TAB_GROUPS_BREEZE = [
+  { label: "chats", tabs: ["chat"] },
+  { label: "tasks", tabs: ["cron", "agents", "sessions"] },
+  { label: "approvals", tabs: ["nodes"] },
+  { label: "connectors", tabs: ["channels", "communications", "instances"] },
+  { label: "memories", tabs: ["skills", "dreams"] },
+  {
+    label: "settings",
+    tabs: [
+      "config",
+      "appearance",
+      "automation",
+      "infrastructure",
+      "aiAgents",
+      "overview",
+      "usage",
+      "debug",
+      "logs",
+    ],
+  },
+] as const;
+
+/** English labels for breeze groups — avoids needing new i18n keys across 13 locales. */
+export const BREEZE_GROUP_LABELS: Record<string, string> = {
+  chats: "Chats",
+  tasks: "Tasks",
+  approvals: "Approvals",
+  connectors: "Connectors",
+  memories: "Memories",
+  settings: "Settings",
+};
+
 export type Tab =
   | "agents"
   | "overview"
